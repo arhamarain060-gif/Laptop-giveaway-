@@ -18,13 +18,13 @@ export default async function handler(req: any, res: any) {
     return res.status(405).json({ success: false, message: 'Method Not Allowed' });
   }
 
-  const { key } = req.body;
-
-  if (!key) {
-    return res.status(400).json({ success: false, message: 'Please enter a ticket key.' });
-  }
-
   try {
+    const { key } = req.body || {};
+
+    if (!key) {
+      return res.status(400).json({ success: false, message: 'Please enter a ticket key.' });
+    }
+
     const ip = req.headers['x-forwarded-for'] || req.socket?.remoteAddress || '127.0.0.1';
 
     // KeyAuth Info from standard parameters
@@ -176,11 +176,12 @@ export default async function handler(req: any, res: any) {
     }
 
   } catch (error: any) {
+    const errMsg = error?.message || String(error);
     console.error('Error verifying activation key:', error);
     return res.status(500).json({
       success: false,
-      message: 'The entered key is invalid. Please verify your code and try again.',
-      error: error.message
+      message: 'The entered key is invalid or the verification portal is offline. Please try again.',
+      error: errMsg
     });
   }
 }

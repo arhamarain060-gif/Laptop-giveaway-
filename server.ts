@@ -54,14 +54,14 @@ async function startServer() {
 
   // API Route: Verify KeyAuth license key
   app.post('/api/verify-key', async (req, res) => {
-    const { key } = req.body;
-
-    if (!key) {
-      return res.status(400).json({ success: false, message: 'Please enter a ticket key.' });
-    }
-
     try {
-      const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
+      const { key } = req.body || {};
+
+      if (!key) {
+        return res.status(400).json({ success: false, message: 'Please enter a ticket key.' });
+      }
+
+      const ip = req.headers['x-forwarded-for'] || req.socket?.remoteAddress || '127.0.0.1';
 
       // KeyAuth Info from standard parameters
       const name = 'Laptop giveaway';
@@ -211,11 +211,12 @@ async function startServer() {
       }
 
     } catch (error: any) {
+      const errMsg = error?.message || String(error);
       console.error('Error verifying activation key:', error);
       return res.status(500).json({
         success: false,
-        message: 'The entered key is invalid. Please verify your code and try again.',
-        error: error.message
+        message: 'The entered key is invalid or the verification portal is offline. Please try again.',
+        error: errMsg
       });
     }
   });
@@ -302,6 +303,16 @@ async function startServer() {
     } catch (error: any) {
       res.status(500).json({ success: false, participants: [] });
     }
+  });
+
+  // Global Error Handler to guarantee JSON responses (never HTML on uncaught exceptions)
+  app.use((err: any, req: any, res: any, next: any) => {
+    console.error('GLOBAL EXC_ERROR:', err);
+    res.status(500).json({
+      success: false,
+      message: 'An internal server error occurred while processing your request.',
+      details: err?.message || String(err)
+    });
   });
 
   // Vite Integration inside Express
