@@ -1,0 +1,6 @@
+{
+  "name": "Laptop Giveaway",
+  "description": "Professional premium laptop giveaway registration with secure ticket key authorization.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
