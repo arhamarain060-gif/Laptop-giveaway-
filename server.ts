@@ -65,10 +65,10 @@ async function startServer() {
 
       // KeyAuth Info from standard parameters
       const name = 'Laptop giveaway';
-      const ownerid = '0380435173';
-      const secret = '4eb9c6477e6e4bcd88cd97ac426d5810f44876baee57cbd5519fd1dbc8d8c861';
+      const ownerid = 'FFbLLd3ccN';
+      const secret = '01cf46fb652667b4b01b32dc80a1c3e932d94ea6ea70e9797fd233ff9d4cbb15';
       const version = '1.0';
-      const url = 'https://www.keyauth-manager.online/api/1.3/';
+      const url = 'https://keyauth.win/api/1.2/';
 
       console.log(`Initializing verification session`);
 
