@@ -107,6 +107,8 @@ async function startServer() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'application/json, text/plain, */*'
         },
         body: initParams,
       });
@@ -115,14 +117,26 @@ async function startServer() {
         throw new Error(`Init failed with status code ${initResponse.status}`);
       }
 
-      const initData: any = await initResponse.json();
+      const initText = await initResponse.text();
+      let initData: any;
+      try {
+        initData = JSON.parse(initText);
+      } catch (parseErr) {
+        console.error('Failed to parse init response as JSON:', initText);
+        return res.status(502).json({
+          success: false,
+          message: 'Gatekeeper portal returned an invalid response. Please contact administration.',
+          details: initText.substring(0, 300)
+        });
+      }
+
       console.log('Secure Init Response:', initData);
 
       if (!initData.success) {
         return res.status(400).json({ 
           success: false, 
           message: 'The ticket verification gateway is currently busy. Please verify your code is correct or try again in a few moments.',
-          details: 'Unable to start verification session with authentication server.'
+          details: initData.message || 'Unable to start verification session with authentication server.'
         });
       }
 
@@ -148,6 +162,8 @@ async function startServer() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'application/json, text/plain, */*'
         },
         body: licenseParams,
       });
@@ -156,7 +172,19 @@ async function startServer() {
         throw new Error(`License check failed with status ${licenseResponse.status}`);
       }
 
-      const licenseData: any = await licenseResponse.json();
+      const licenseText = await licenseResponse.text();
+      let licenseData: any;
+      try {
+        licenseData = JSON.parse(licenseText);
+      } catch (parseErr) {
+        console.error('Failed to parse license response as JSON:', licenseText);
+        return res.status(502).json({
+          success: false,
+          message: 'Authentication gateway returned an invalid verification format. Please try again.',
+          details: licenseText.substring(0, 300)
+        });
+      }
+
       console.log('Secure Verification Response:', licenseData);
 
       if (licenseData.success) {

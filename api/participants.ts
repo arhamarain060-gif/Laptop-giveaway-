@@ -1,4 +1,4 @@
-import { readParticipantsList } from './shared.js';
+import { readParticipantsList } from './shared';
 
 export default async function handler(req: any, res: any) {
   // CORS configuration for Vercel deployment

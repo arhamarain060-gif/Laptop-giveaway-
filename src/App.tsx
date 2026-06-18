@@ -164,7 +164,14 @@ export default function App() {
         body: JSON.stringify({ key: keyToUse.trim() }),
       });
 
-      const data = await response.json();
+      const responseText = await response.text();
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('Failed to parse response as JSON:', responseText);
+        throw new Error(`Gatekeeper API error (Status ${response.status}). The server returned an invalid format.`);
+      }
 
       if (response.ok && data.success) {
         setVerifiedKey(keyToUse.trim());
@@ -185,10 +192,13 @@ export default function App() {
         }
       } else {
         setError(data.message || 'The entered code is invalid or already fully consumed.');
+        if (data.details) {
+          console.error('Gatekeeper detailed verification error:', data.details);
+        }
       }
     } catch (err: any) {
       console.error('Error in validation network check:', err);
-      setError('Could not connect to authentication portal. Please try again.');
+      setError(err.message || 'Could not connect to authentication portal. Please try again.');
     } finally {
       setLoading(false);
     }
